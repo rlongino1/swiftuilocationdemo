@@ -21,12 +21,15 @@ class LocationProvider: NSObject {
         super.init()
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
-        
     }
     
     public func acquireCurrentLocation() {
-        self.locationManager.requestWhenInUseAuthorization()
+        if CLLocationManager.locationServicesEnabled() {
+            self.locationManager.startUpdatingLocation()
+        } else {
+            self.locationManager.requestWhenInUseAuthorization()
+        }
+        
     }
 }
 
@@ -37,7 +40,6 @@ extension LocationProvider: CLLocationManagerDelegate {
         
         case .notDetermined:
             // Do Nothing
-            self.delegate?.errorMessageReceived("Location Authorization Not Determined.")
             break
         case .authorizedWhenInUse:
             // Get Location
@@ -59,7 +61,6 @@ extension LocationProvider: CLLocationManagerDelegate {
             break
         default:
             // Do Nothing
-        
             break
         }
     }
@@ -68,7 +69,7 @@ extension LocationProvider: CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         print("Location Updated!")
         self.delegate?.locationDidUpdate(location)
-        // self.geocode()
+        self.locationManager.stopUpdatingLocation()
     }
 }
 
