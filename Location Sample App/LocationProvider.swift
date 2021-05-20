@@ -7,15 +7,18 @@
 
 import Foundation
 import CoreLocation
+import CoreData
 
 class LocationProvider: NSObject {
     
     private let locationManager = CLLocationManager()
     var delegate: LocationProviderDelegate?
+    // @Environment(\.managedObjectContext) private var viewContext
     
     public var currentLocation: CLLocation? {
         return self.locationManager.location
     }
+    private var mostRecentLocation: CLLocation?
     
     override init() {
         super.init()
@@ -29,7 +32,6 @@ class LocationProvider: NSObject {
         } else {
             self.locationManager.requestWhenInUseAuthorization()
         }
-        
     }
 }
 
@@ -69,6 +71,7 @@ extension LocationProvider: CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         print("Location Updated!")
         self.delegate?.locationDidUpdate(location)
+        self.mostRecentLocation = location
         self.locationManager.stopUpdatingLocation()
     }
 }
@@ -112,5 +115,30 @@ extension CLLocation {
     
     var longitude: Double {
         return self.coordinate.longitude
+    }
+}
+
+extension LocationProvider {
+    
+    func saveLocation() {
+        
+        if let _mostRecentLocation = mostRecentLocation {
+            let viewContext = PersistenceController.shared.container.viewContext
+            
+            let savedLocation = Item(context: viewContext)
+            savedLocation.latitude = _mostRecentLocation.latitude
+            savedLocation.longitude = _mostRecentLocation.longitude
+            savedLocation.timestamp = Date()
+            
+            do {
+                try viewContext.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nsError = error as NSError
+                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            }
+        }
+        
     }
 }

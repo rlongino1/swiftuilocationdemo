@@ -18,7 +18,7 @@ struct LocationView: View {
                 Text("Get location")
             }
             Button(action: {
-                
+                locationModel.locationManager.saveLocation()
             }) {
                 Text("Save location")
             }

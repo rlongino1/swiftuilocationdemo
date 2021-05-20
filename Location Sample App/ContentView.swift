@@ -21,7 +21,8 @@ struct ContentView: View {
             LocationView().environmentObject(LocationObservable())
             List {
                 ForEach(items) { item in
-                    Text("Item at \(item.timestamp!, formatter: itemFormatter)")
+                    Text("Saved Location: \(item.timestamp!, formatter: itemFormatter)")
+                    Text("\(item.latitude), \(item.longitude)")
                 }
                 .onDelete(perform: deleteItems)
             }
